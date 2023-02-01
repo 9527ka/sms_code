@@ -1,0 +1,165 @@
+{extend name='public/base' /}
+{block name='content'}
+{include file='public/content_header' /}
+<section class="content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <!-- 表单头部 -->
+                <div class="card-header">
+                    <div class="btn-group">
+                        <a class="btn flat btn-sm btn-default BackButton">
+                            <i class="fas fa-arrow-left"></i>
+                            返回
+                        </a>
+                    </div>
+                </div>
+                <!-- 表单 -->
+                <form id="dataForm" class="form-horizontal dataForm" action="" method="post" enctype="multipart/form-data">
+                    <!-- 表单字段区域 -->
+                    <div class="card-body">
+                        <input id="sms_url_id" name="sms_url_id" value="{$data.sms_url_id|default=''}" placeholder="请输入渠道id" type="hidden" class="form-control fieldText">
+<div class="form-group row rowText">
+    <label for="com" class="col-sm-2 col-form-label">com</label>
+    <div class="col-sm-10 col-md-4 formInputDiv">
+        <input id="com" name="com" value="{$data.com|default='1'}" placeholder="请输入com" type="text" class="form-control fieldText">
+    </div>
+</div>
+<div class="form-group row rowMobile">
+    <label for="mobile" class="col-sm-2 col-form-label">手机号</label>
+    <div class="col-sm-10 col-md-4 formInputDiv">
+        <input id="mobile" name="mobile" value="{$data.mobile|default=''}" placeholder="请输入手机号" type="tel" maxlength="11" class="form-control fieldMobile">
+    </div>
+</div>
+<div class="form-group row rowSelect">
+    <label for="is_get" class="col-sm-2 col-form-label">取号状态</label>
+    <div class="col-sm-10 col-md-4 formInputDiv">
+        <select name="is_get" id="is_get" class="form-control select2bs4 fieldSelect" data-placeholder="请选择取号状态">
+            <option value=""></option>
+                    {foreach is_get_list as $key=>$value}
+        <option value="{$key}" {if isset($data) && $data.is_get==$key}selected{/if}>{$value}</option>
+        {/foreach}
+        </select>
+    </div>
+
+    <script>
+        $('#sms_url_id').select2();
+        $('#is_get').select2({
+            theme: 'bootstrap4'
+        });
+    </script>
+</div>
+<div class="form-group row rowSelect">
+    <label for="status" class="col-sm-2 col-form-label">状态</label>
+    <div class="col-sm-10 col-md-4 formInputDiv">
+        <select name="status" id="status" class="form-control select2bs4 fieldSelect" data-placeholder="请选择状态">
+            <option value=""></option>
+                    {foreach status_list as $key=>$value}
+        <option value="{$key}" {if isset($data) && $data.status==$key}selected{/if}>{$value}</option>
+        {/foreach}
+        </select>
+    </div>
+
+    <script>
+        $('#status').select2({
+            theme: 'bootstrap4'
+        });
+    </script>
+</div>
+<!--<div class="form-group row rowText">-->
+<!--    <label for="code" class="col-sm-2 col-form-label">验证码</label>-->
+<!--    <div class="col-sm-10 col-md-4 formInputDiv">-->
+<!--        <input id="code" name="code" value="{$data.code|default='1'}" placeholder="请输入验证码" type="text" class="form-control fieldText">-->
+<!--    </div>-->
+<!--</div>-->
+<div class="form-group row rowText">
+    <label for="remark" class="col-sm-2 col-form-label">备注</label>
+    <div class="col-sm-10 col-md-4 formInputDiv">
+        <textarea class="form-control" id="remark" name="remark" style="width: 100%" placeholder="请输入备注" rows="6">{$data.remark|default=''}</textarea>
+    </div>
+</div>
+<div class="form-group row rowMobile">
+    <label for="set_num" class="col-sm-2 col-form-label">修改次数</label>
+    <div class="col-sm-10 col-md-4 formInputDiv">
+        <input id="set_num" name="set_num" value="{$data.set_num|default=''}" placeholder="修改次数" type="tel" maxlength="1" class="form-control fieldMobile">
+    </div>
+</div>
+
+                    </div>
+                    <!-- 表单底部 -->
+                    <div class="card-footer">
+                        <div class="row">
+                            <div class="col-sm-2">
+                            </div>
+
+                            <div class="col-sm-10 col-md-4 formInputDiv">
+
+                                <div class="btn-group">
+                                    <button type="submit" class="btn btn-sm btn-primary dataFormSubmit">
+                                        保 存
+                                    </button>
+                                </div>
+                                <div class="btn-group">
+                                    <button type="reset" class="btn btn-sm btn-default dataFormReset">
+                                        重 置
+                                    </button>
+                                </div>
+
+                                {if !isset($data)}
+                                <div class="btn-group float-right createContinueDiv">
+                                    <input type="checkbox" class="form-check-input" value="1" id="_create" name="_create" title="继续添加数据">
+                                    <label class="form-check-label" for="_create">继续添加</label>
+                                </div>
+                                {/if}
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+<script>
+    /** 表单验证 **/
+    $('#dataForm').validate({
+        rules: {
+                'com': {
+                required: true,
+
+    },
+    'mobile': {
+                required: true,
+
+    },
+    'code': {
+                required: true,
+
+    },
+    'remark': {
+                required: true,
+
+    },
+
+        },
+        messages: {
+                'com': {
+               required: "com不能为空",
+
+    },
+    'mobile': {
+               required: "手机号不能为空",
+
+    },
+    'code': {
+               required: "验证码不能为空",
+
+    },
+    'remark': {
+               required: "备注不能为空",
+
+    },
+
+        }
+    });
+</script>
+{/block}

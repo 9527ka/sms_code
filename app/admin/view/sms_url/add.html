@@ -1,0 +1,128 @@
+{extend name='public/base' /}
+{block name='content'}
+{include file='public/content_header' /}
+<section class="content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <!-- 表单头部 -->
+                <div class="card-header">
+                    <div class="btn-group">
+                        <a class="btn flat btn-sm btn-default BackButton">
+                            <i class="fas fa-arrow-left"></i>
+                            返回
+                        </a>
+                    </div>
+                </div>
+                <!-- 表单 -->
+                <form id="dataForm" class="form-horizontal dataForm" action="" method="post" enctype="multipart/form-data">
+                    <!-- 表单字段区域 -->
+                    <div class="card-body">
+                        <div class="form-group row rowText">
+    <label for="channel_name" class="col-sm-2 col-form-label">渠道名称</label>
+    <div class="col-sm-10 col-md-4 formInputDiv">
+        <input id="channel_name" name="channel_name" value="{$data.channel_name|default=''}" placeholder="请输入渠道名称" type="text" class="form-control fieldText">
+    </div>
+</div>
+<div class="form-group row rowText">
+    <label for="channel" class="col-sm-2 col-form-label">渠道编码</label>
+    <div class="col-sm-10 col-md-4 formInputDiv">
+        <input id="channel" name="channel" value="{$data.channel|default=''}" placeholder="请输入渠道编码" type="text" class="form-control fieldText">
+    </div>
+</div>
+<div class="form-group row rowText">
+    <label for="receive_url" class="col-sm-2 col-form-label">收码URL</label>
+    <div class="col-sm-10 col-md-4 formInputDiv">
+        <input id="receive_url" name="receive_url" value="{$data.receive_url|default=''}" placeholder="请输入收码URL" type="text" class="form-control fieldText">
+    </div>
+</div>
+<div class="form-group row rowText">
+    <label for="send_url" class="col-sm-2 col-form-label">发码URL</label>
+    <div class="col-sm-10 col-md-4 formInputDiv">
+        <input id="send_url" name="send_url" value="{$data.send_url|default=''}" placeholder="请输入发码URL" type="text" class="form-control fieldText">
+    </div>
+</div>
+<div class="form-group row rowText">
+    <label for="remark" class="col-sm-2 col-form-label">com,手机号</label>
+    <div class="col-sm-10 col-md-4 formInputDiv">
+        <textarea class="form-control" id="com_phone" name="com_phone" style="width: 100%" placeholder="请粘贴com,手机号|com 手机号|com----手机号" rows="10"></textarea>
+    </div>
+</div>
+                    </div>
+                    <!-- 表单底部 -->
+                    <div class="card-footer">
+                        <div class="row">
+                            <div class="col-sm-2">
+                            </div>
+
+                            <div class="col-sm-10 col-md-4 formInputDiv">
+
+                                <div class="btn-group">
+                                    <button type="submit" class="btn btn-sm btn-primary dataFormSubmit">
+                                        保 存
+                                    </button>
+                                </div>
+                                <div class="btn-group">
+                                    <button type="reset" class="btn btn-sm btn-default dataFormReset">
+                                        重 置
+                                    </button>
+                                </div>
+
+                                {if !isset($data)}
+                                <div class="btn-group float-right createContinueDiv">
+                                    <input type="checkbox" class="form-check-input" value="1" id="_create" name="_create" title="继续添加数据">
+                                    <label class="form-check-label" for="_create">继续添加</label>
+                                </div>
+                                {/if}
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+<script>
+    /** 表单验证 **/
+    $('#dataForm').validate({
+        rules: {
+                'channel_name': {
+                required: true,
+
+    },
+    'channel': {
+                required: true,
+
+    },
+    'send_url': {
+                required: true,
+
+    },
+    'receive_url': {
+                required: true,
+
+    },
+
+        },
+        messages: {
+                'channel_name': {
+               required: "渠道名称不能为空",
+
+    },
+    'channel': {
+               required: "渠道编码不能为空",
+
+    },
+    'send_url': {
+               required: "发码URL不能为空",
+
+    },
+    'receive_url': {
+               required: "取码URL不能为空",
+
+    },
+
+        }
+    });
+</script>
+{/block}

@@ -1,0 +1,260 @@
+{extend name="public/base" /}
+{block name='content'}
+{include file='public/content_header' /}
+<!--数据列表页面-->
+<style>
+.copy_btn{
+    font-size: 12px;
+    border: 1px solid #ccc;
+    margin-left: 5px;
+}
+#copy_input{
+    width:1px;
+    height:1px;
+    border: unset;
+}
+</style>
+<section class="content">
+
+    <!--顶部搜索筛选-->
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header dataSearch">
+                <form class="form-inline searchForm" id="searchForm" action="{:url('index')}" method="GET">
+                    <div class="form-group smallSelect" style="margin-right:10px;">
+                        <select name="sms_url_id" id="sms_url_id" class="form-control input-sm index-order">
+                            <option value="">全部渠道</option>
+                            {foreach name='url_list' id='item' key='key'}
+                            <option value="{$item.id}" {if isset($sms_url_id) && $sms_url_id==$item.id}selected{/if}>{$item.channel_name}</option>
+                            {/foreach}
+                        </select>
+                    </div>
+                    <div class="form-group smallSelect" style="margin-right:10px;">
+                        <select name="is_get" id="is_get" class="form-control input-sm index-order">
+                            <option value="">全部取号状态</option>
+                            <option value="1" {if isset($is_get) && $is_get=="1"}selected{/if}>未取</option>
+                            <option value="2" {if isset($is_get) && $is_get=="2"}selected{/if}>已取</option>
+                        </select>
+                    </div>
+                    <div class="form-group smallSelect" style="margin-right:10px;">
+                        <select name="status" id="status" class="form-control input-sm index-order">
+                            <option value="">全部状态</option>
+                            <option value="-1" {if isset($status) && $status=="-1"}selected{/if}>初始</option>
+                            <option value="0" {if isset($status) && $status=="0"}selected{/if}>失败</option>
+                            <option value="1" {if isset($status) && $status=="1"}selected{/if}>成功</option>
+                            <option value="2" {if isset($status) && $status=="2"}selected{/if}>注册失败</option>
+                        </select>
+                    </div>
+                    <div class="input-group input-group-sm searchGroup">
+                        <input value="{$_keywords ? $_keywords : '' ;}"
+                               name="_keywords" id="_keywords" class="form-control input-sm" placeholder="手机号">
+                    </div>
+<script>
+    $('#sms_url_id').select2();
+    $('#is_get').select2();
+    $('#status').select2();
+</script>
+                    <div class="form-group">
+                            <input id="start_time" name="start_time" value="{$start_time|default=''}" placeholder="请选择开始时间" type="text" class="form-control filed-datetime">
+                            <input id="end_time" name="end_time" value="{$end_time|default=''}" placeholder="请选择结束时间" type="text" class="form-control filed-datetime">
+                    </div>
+                    <script>
+                        laydate.render({elem: '#start_time',type: 'datetime'});
+                        laydate.render({elem: '#end_time',type: 'datetime'});
+                    </script>
+                    <div class="form-group searchGroup">
+                        <button class="btn btn-sm btn-primary" type="submit"><i class="fa fa-search"></i> 查询
+                        </button>
+                    </div>
+                    <div class="form-group searchGroup">
+    <!--<button onclick="exportData()" class="btn btn-sm btn-info exportData" type="button"><i class="fas fa-file-export"></i> 导出-->
+    <!--</button>-->
+    <button onclick="jumpUrl()" class="btn btn-sm btn-primary" style="margin-left:10px;">查看</button>
+</div>
+                    <div class="form-group searchGroup">
+                        <button onclick="clearSearchForm()" class="btn btn-sm btn-default" type="button"><i
+                                class="fa  fa-eraser"></i> 清空查询
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function jumpUrl(){
+        window.open("{:url('list')}?sms_url_id="+$('#sms_url_id').val()+"&is_get="+$('#is_get').val()+"&status="+$('#status').val()+"&_keywords="+$('#_keywords').val()+"&start_time="+$('#start_time').val()+"&end_time="+$('#end_time').val());
+    }
+</script>
+    <!--顶部导入功能-->
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header dataImport">
+                <form class="form-inline importForm" id="importForm" action="{:url('import')}" method="POST"  enctype="multipart/form-data">
+                    <input type='hidden' name='sms_url_id' id='import_sms_url_id'>
+                    <!--<div class="input-group input-group-sm importGroup">-->
+                    <!--    <div class="custom-file importContainer">-->
+                    <!--        <input type="file" class="custom-file-input importFileInput" name="file" id="file" accept=".xlsx">-->
+                    <!--        <label class="custom-file-label importFileLabel" for="file">选择文件</label>-->
+                    <!--    </div>-->
+                    <!--</div>-->
+                    <!--<script>-->
+                    <!--$(function () {-->
+                    <!--    bsCustomFileInput.init();-->
+                    <!--});-->
+                    <!--</script>-->
+
+                    <!--<div class="form-group importGroup">-->
+                    <!--    <button class="btn btn-sm btn-warning" type="submit"><i class="fas fa-file-upload"></i> 导入-->
+                    <!--    </button>-->
+                    <!--</div>-->
+
+                    <!--<div class="form-group importGroup">-->
+                    <!--    <a href="{:url('import',['action'=>'download_example'])}" target="_blank" class="btn btn-sm btn-default" type="button">-->
+                    <!--    <i class="fas fa-download"></i> 下载模版文件-->
+                    <!--    </a>-->
+                    <!--</div>-->
+                    <div>成功：{$succNum};  失败：{$errNum}</div>
+                </form>
+                <script>
+                    // $("#importForm").validate({
+                    //     rules: {
+                    //         file: {
+                    //             required: true,
+                    //         },
+                    //     },
+                    //     messages: {
+                    //         file: {
+                    //             required: "请选择要导入的文件",
+                    //         },
+                    //     },
+                    // });
+                    $('.importBtn').click(function(){
+                        // console.log($('#file').val())
+                        if($('#sms_url_id').val() == ""){
+                            layer.msg('请选择渠道');
+                            return false
+                        }
+                        if($('#file').val() == ""){
+                            layer.msg('请添加文件');
+                            return false
+                        }
+                        $('#import_sms_url_id').val($('#sms_url_id').val())
+                        $("#importForm").submit();
+                   });
+                   function copyText(str) {
+                    var input = document.getElementById("copy_input");
+                    input.value = str; // 修改文本框的内容
+                    input.select(); // 选中文本
+                    document.execCommand("copy"); // 执行浏览器复制命令
+                    layer.msg("Success");
+                    }
+                </script>
+            </div>
+        </div>
+    </div>
+</div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+
+                <!--数据列表顶部-->
+                <div class="card-header">
+                    <div>
+                        <a title="添加新数据" data-toggle="tooltip" class="btn btn-primary btn-sm "  href="{:url('add')}">
+    <i class="fa fa-plus"></i> 添加
+</a>
+                        <button class="btn btn-danger btn-sm AjaxButton" data-toggle="tooltip" title="删除选中数据" data-confirm-title="删除确认" data-confirm-content="您确定要删除选中的数据吗？" data-id="checked" data-url="{:url('del')}">
+    <i class="fa fa-trash"></i> 删除
+</button>
+                        
+                        <button class="btn btn-default btn-sm ReloadButton" data-toggle="tooltip" title="刷新列表数据"><i class="fas fa-redo"></i> 刷新</button>
+                        {if isset($sms_url_id) && $sms_url_id != ''}
+                        <div style="float:right;">
+                            发：{$data[0]['send_url']}<br>
+                            收：{$data[0]['receive_url']}
+                        </div>
+                        {/if}
+                    </div>
+                </div>
+
+                <div class="card-body table-responsive p-0" >
+                    <table class="table table-hover table-bordered dataTable text-nowrap">
+                        <thead>
+                        <tr>
+                            <th>
+    <input id="dataCheckAll" type="checkbox" onclick="checkAll(this)" class="checkbox" placeholder="全选/取消">
+</th>
+                                        <th>ID</th>
+            <th>渠道链接名称</th>
+            <th>com</th>
+            <th>手机号</th>
+            <th>取号状态</th>
+            <th>状态</th>
+            <th>备注</th>
+            <th>修改次数</th>
+            <th>更新时间</th>
+
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {foreach name='data' id='item' key='data_key'}
+                        <tr>
+                            <td>
+    <input type="checkbox" onclick="checkThis(this)" name="dataCheckbox" data-id="{$item.id}" class="checkbox dataListCheck" value="{$item.id}" placeholder="选择/取消">
+</td>
+                                        <td>{$item.id}</td>
+            <td>{$item.channel_name}</td>
+            <td>{$item.com}</td>
+            <td>{$item.mobile}<button class="copy_btn" onclick="copyText('{$item.mobile.','.$item.remark}')">Copy</button></td>
+            <td>{$item.is_get_name}</td>
+            <td>{$item.status_name}</td>
+            <td>{$item.remark}</td>
+            <td>{$item.set_num}</td>
+            <td>{$item.update_time}</td>
+
+                            <td class="td-do">
+                                <a href="{:url('edit',['id'=>$item.id])}"
+                                   class="btn btn-primary btn-xs" title="修改" data-toggle="tooltip">
+                                    <i class="fas fa-pen"></i>
+                                    
+                                </a>
+                                <button class="btn btn-danger btn-xs AjaxButton" data-toggle="tooltip" title="删除"  data-id="{$item.id}" data-confirm-title="删除确认" data-confirm-content='您确定要删除ID为 <span class="text-red">{$item.id}</span> 的数据吗' data-url="{:url('del')}">
+    <i class="fas fa-trash-alt"></i>
+</button>
+                                
+                            </td>
+                        </tr>
+                        {/foreach}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 数据列表底部 -->
+                <div class="card-footer">
+                    <div class="box-footer">
+                        {$page|raw}
+                        <label class="control-label pull-right" style="margin-right: 10px; font-weight: 100;">
+                            <small>共{$total}条记录</small>&nbsp;
+                            <small>每页显示</small>
+                            &nbsp;
+                            <select class="input-sm" onchange="changePerPage(this)">
+                                <option value="200" {if $admin.admin_list_rows==200}selected{/if}>200</option>
+                                <option value="300" {if $admin.admin_list_rows==300}selected{/if}>300</option>
+                                <option value="500" {if $admin.admin_list_rows==500}selected{/if}>500</option>
+                                <option value="1000" {if $admin.admin_list_rows==1000}selected{/if}>1000</option>
+                            </select>
+                            &nbsp;
+                            <small>条记录</small>
+                        </label>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div><textarea id="copy_input">test</textarea>
+</section>
+{/block}
