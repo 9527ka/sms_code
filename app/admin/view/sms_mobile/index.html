@@ -77,6 +77,9 @@
                                 class="fa  fa-eraser"></i> 清空查询
                         </button>
                     </div>
+                    {if isset($sms_url_id) && $sms_url_id != ''}
+                    <button onclick="resetMobile()" class="btn btn-sm btn-primary" style="margin-left:10px;">重置次数</button>
+                    {/if}
                 </form>
             </div>
         </div>
@@ -85,6 +88,10 @@
 <script>
     function jumpUrl(){
         window.open("{:url('list')}?sms_url_id="+$('#sms_url_id').val()+"&is_get="+$('#is_get').val()+"&status="+$('#status').val()+"&_keywords="+$('#_keywords').val()+"&start_time="+$('#start_time').val()+"&end_time="+$('#end_time').val());
+    }
+    //重置号码次数
+    function resetMobile(){
+        ajaxSubmit("{:url('resetMobile')}?sms_url_id="+$('#sms_url_id').val(),{});
     }
 </script>
     <!--顶部导入功能-->

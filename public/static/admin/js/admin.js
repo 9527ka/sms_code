@@ -342,7 +342,12 @@ function ajaxSubmit(url,data){
         data:data,
         type:'JSON',
         success:function (res){
-            console.log(res);
+            layer.msg(res.msg, {
+                icon: res.code === 200 ? 1 : 2,
+                scrollbar: false,
+            });
+            // window.location.reload()
+            goUrl(result.data.redirect);
         }
     });
 }

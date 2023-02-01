@@ -15,6 +15,16 @@ use app\common\validate\SmsMobileValidate;
 
 class SmsMobileController extends AdminBaseController
 {
+    //重置号码
+    public function resetMobile(Request $request)
+    {
+        $param = $request->param();
+        $map[] = ['sms_url_id','=',$param['sms_url_id']];
+        $map[] = ['status','=',2];
+        $result = SmsMobile::where($map)->update(['set_num'=>0]);
+        return $result ? admin_success('重置成功') : admin_error('重置失败或暂无需要重置的号码');
+    }
+    
     public function list(Request $request, SmsMobile $model): string
     {
         $mobile = $request->param('_keywords');

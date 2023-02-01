@@ -93,6 +93,19 @@ class SmsUrlController extends AdminBaseController
                 $param['send_url'] = 'https://smsncdn.szfangsk5.net:48888/SendRoom.php?Room=7kAMiHgYZ1';
                 $param['receive_url'] = 'https://smsncdn.szfangsk5.net:48888/listforjson.php?Room='.trim($receive_url[1]);
             }else{
+                //http://sms.newszfang.vip:3000/NHiSa4Rpm57qEeDojNENjk/send
+                //http://sms.newszfang.vip:3000/LnHPvdLfrUBpuPgXBL7EZg
+                
+                if(strpos($param['send_url'], 'sms.newszfang.vip')){
+                    $send_url = str_replace("/send","",$param['send_url']);
+                    $send_url = explode(':3000/', $send_url);
+                    $param['send_url'] = 'http://sms.newszfang.vip:3000/api/send';
+                    $param['channel'] = trim($send_url[1]);//token
+                    
+                    $receive_url = explode(":3000/", $param['receive_url']);
+                    $param['receive_url'] = 'http://sms.newszfang.vip:3000/api/smslist?token='.$receive_url[1];
+                }
+                
                 //sms.szfangmm.com
                 if(strpos($param['send_url'], 'sms.szfangmm.com')){
                     $send_url = str_replace("/send","",$param['send_url']);
