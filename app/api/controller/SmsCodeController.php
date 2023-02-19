@@ -19,14 +19,27 @@ use app\common\exception\CommonServiceException;
 class SmsCodeController extends ApiBaseController
 {
     protected array $loginExcept= [
+        'api/smsCode/channel',
         'api/smsCode/getPhone',
         'api/smsCode/send',
         'api/smsCode/getCode',
         'api/smsCode/feedBack',
+        'api/smsCode/getPhoneTest'
     ];
     
     public $aesKey = 'EA6BE594D61BFA53';
+    //新版码商 V3
+    public $http = 'http://118.195.190.73:8061';
+    public $tokenStr = '?token=6cf237dc9911f3b757c0f54207c71169&projectID=dyzc888';//token
     
+    // public function channel(){
+    //     $map['on_off'] = 1;
+    //     $url = SmsUrl::where($map)->select();
+    //     if(empty($url)){
+    //         return api_error('Success');
+    //     }
+    //     return api_success($url,'Success');
+    // }
     public function send(){
         $smsMobile = new SmsMobile();
         $p = $this->param;
@@ -90,7 +103,6 @@ class SmsCodeController extends ApiBaseController
         
         //取匹配到的号
         $codeInfo = SmsCode::where('mobile',$key1)->whereOr('mobile',$key2)->whereOr('mobile',$phone)->find();
-        
         if(empty($codeInfo)){
             return api_error('Error');
         }
@@ -105,27 +117,26 @@ class SmsCodeController extends ApiBaseController
         //更新时间12小时内\1分钟后
         $days_time = time()-43200;
         $u_time = time();
-        $mobileInfo = SmsMobile::where("(`is_get` = 1 AND `status` = -1 AND update_time = 0 ) OR (`is_get` = 1 AND update_time+60 < $u_time AND update_time > $days_time AND `set_num` <= 10 AND `status` <> 1 AND `status` <> 0)")->field('id,mobile,sms_url_id')->lock(true)->find();
+        $mobileInfo = SmsMobile::where("(`is_get` = 1 AND `status` = -1 AND update_time = 0 ) OR (`is_get` = 1 AND update_time+120 < $u_time AND update_time > $days_time AND `set_num` <= 10 AND `status` <> 1 AND `status` <> 0)")->field('id,mobile,sms_url_id')->lock(true)->find();
         // echo SmsMobile::getlastsql();die;
         try {
-            if(empty($mobileInfo)){
-                throw new CommonServiceException('获取失败');
+            //数据库号码为空时，去接口获取
+            if(!empty($mobileInfo)){
+                $mobile = $mobileInfo->mobile;
+                SmsMobile::where(['id' => $mobileInfo->id])->update([
+                    'is_get' => 2,
+                    'update_time' => time()
+                ]);
+            }else{
+                throw new CommonServiceException('暂无可用号码');
             }
-            if($mobileInfo->set_num > 10){
-                throw new CommonServiceException('设置失败次数大于10次');
-            }
-            SmsMobile::where(['id' => $mobileInfo->id])->update([
-                'is_get' => 2,
-                'update_time' => time()
-            ]);
-            
             Db::commit();
         } catch (Exception $e) {
             // 回滚事务
             Db::rollback();
             return api_error($e->getMessage());
         }
-        $mobile = enAES($mobileInfo->mobile, $this->aesKey);
+        $mobile = enAES($mobile, $this->aesKey);
         return api_success(['phone'=>$mobile],'Success');
     }
     

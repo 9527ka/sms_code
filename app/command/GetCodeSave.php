@@ -35,10 +35,9 @@ class GetCodeSave extends Command
             $url = $v['receive_url'];
             // echo $url."\n";
             $res = http_curl($url);
+            if(empty($res)) continue;
             $arr = json_decode($res, true);
-            if(empty($arr)){
-                continue;
-            }
+            if(empty($arr)) continue;
             echo json_encode($arr)."\n";
             # 存储验证码,存数据库
             $res = array();
@@ -67,18 +66,20 @@ class GetCodeSave extends Command
                 if (isset($val["com"])){
                     $key = $key."-".$val["com"];
                 }
+                
                 //创建时间
-                // $time = isset($js['updatetime']) ? $js['updatetime'] : $js['time'];
-                // $time = $time ? strtotime($time) : time();
-                $time = time();
+                $time = isset($js['updatetime']) ? $js['updatetime'] : $js['time'];
+                $time = $time ? strtotime($time) : time();
                 $res[$key] = $val;
-                $isCode = SmsCode::where(['mobile' => $val['phone']])->find();
+                $code = SmsCode::where(['mobile' => $val['phone']])->find();
                 //手机号 验证码记录是否存在
-                if($isCode){
-                    SmsCode::where(['mobile' => $val['phone']])->update([
-                        'code' => $val['msg'],
-                        'create_time' => $time
-                    ]);
+                if($code){
+                    if($code['create_time'] <= $time){
+                        SmsCode::where(['mobile' => $val['phone']])->update([
+                            'code' => $val['msg'],
+                            'create_time' => $time
+                        ]);
+                    }
                 }else{
                     SmsCode::insert([
                         'code' => $val['msg'],

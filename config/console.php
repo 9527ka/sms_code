@@ -11,6 +11,7 @@ use app\command\GetCodeLrj;
 use app\command\GetMobileLrj;
 use app\command\GetMobileLrjTest;
 use app\command\WuxianCode;
+use app\command\DouYinFirst;
 
 return [
     // 指令定义
@@ -35,5 +36,7 @@ return [
         // 'getMobileLrjTest' => GetMobileLrjTest::class,
         //扒网页的 抖音取码
         'wuxianCode' => WuxianCode::class,
+        //抖音首次
+        'douYinFirst' => DouYinFirst::class,
     ],
 ];

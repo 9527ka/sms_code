@@ -87,13 +87,13 @@
             <td>{$item.id}</td>
             <td>{$item.channel_name}</td>
             <td>
-                <a href="/admin/smsUrl/onOff?id={$item.id}&on_off={$item.on_off}">{if($item.on_off==1)}开{else}关{/if}</a>
+                <a href="/admin/smsUrl/onOff?id={$item.id}&on_off={$item.on_off}">{if($item.on_off==1)}<span style="color:red;">开</span>{else}关{/if}</a>
             </td>
             <td>{$item.channel}</td>
             <td>{$item.mobile_num}</td>
             <td>{$item.success_num}</td>
-            <td><div style="max-width:300px;overflow:hidden;">{$item.send_url}</div></td>
-            <td><div style="max-width:300px;overflow:hidden;">{$item.receive_url}</div></td>
+            <td>{$item.send_url}</td>
+            <td>{$item.receive_url}</td>
             <td>{$item.create_time}</td>
                             <td class="td-do">
                                 <a href="{:url('edit',['id'=>$item.id])}" class="btn btn-primary btn-xs" title="修改" data-toggle="tooltip"><i class="fas fa-pen"></i></a>

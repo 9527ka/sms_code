@@ -24,15 +24,16 @@ class WuxianCode extends Command
 
     protected function execute(Input $input, Output $output)
     {
+        echo "无限码：\n";
         $days_time = time()-43200;
         $map[] = ['sms_url_id','=',126];
         $map[] = ['status','<>',0];
         $map[] = ['status','<>',1];
-        $map[] = ['set_num','<',20];
+        $map[] = ['set_num','<',10];
         // $map[] = ['create_time','>',$days_time];//创建时间大于12小时前
         $onOff = SmsUrl::where('id',126)->value('on_off');
         if($onOff == 2){
-            exit("无限码任务已关闭\n");
+            exit("任务已关闭\n");
         }
         $smsInfo = SmsMobile::where($map)->field('GROUP_CONCAT(mobile) as mobile_str')->find();
         if(empty($smsInfo->mobile_str)) return "----not phone----\n";

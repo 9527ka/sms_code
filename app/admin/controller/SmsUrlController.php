@@ -83,15 +83,31 @@ class SmsUrlController extends AdminBaseController
                 return admin_error("渠道名称重复");
             }
             /*******************格式兼容 End**********************/
-            
             /*
+            收：https://smsncdn.szfangsk5.net:48888/Room.php?Room=nyoy2OjRDa
+            发：http://sms.szfangmm.com:3000/reMTR4Lj7thZ4UBSu2vkQc/send
+            
             发： https://smsncdn.szfangsk5.net:48888/SendRoom.php?Room=7kAMiHgYZ1
             收： http://sms.szfangmm.com:3000/api/smslist?token=yWEK8pnpMmy45aHDVgFbpX
+            
+            https://smsncdn.szfangsk5.net:48888/SendRoom.php?Room=bR3U1AUD41
+            http://sms.szfangmm.com:3000/8RWoWsJW4qdMrzh6ccJ2zJ
             */
-            if(strpos($param['send_url'], 'smsncdn.szfangsk5.net') && strpos($param['receive_url'], 'sms.szfangmm.com')){
-                $receive_url = explode('com:3000/', $param['receive_url']);
-                $param['send_url'] = 'https://smsncdn.szfangsk5.net:48888/SendRoom.php?Room=7kAMiHgYZ1';
+            if(strpos($param['send_url'], 'sms.szfangmm.com') && strpos($param['receive_url'], 'smsncdn.szfangsk5.net')){
+                $send_url = str_replace("/send","",$param['send_url']);//剔除/send
+                $send_url = explode(':3000/', $send_url);
+                // var_dump($send_url);die;
+                $param['channel'] = trim($send_url[1]);//token
+                
+                $receive_url = explode('?Room=', $param['receive_url']);
                 $param['receive_url'] = 'https://smsncdn.szfangsk5.net:48888/listforjson.php?Room='.trim($receive_url[1]);
+                $param['send_url'] = 'http://sms.szfangmm.com:3000/api/send';
+            }else if(strpos($param['send_url'], 'smsncdn.szfangsk5.net') && strpos($param['receive_url'], 'sms.szfangmm.com')){
+                $send_url = explode('?Room=', $param['send_url']);
+                $param['channel'] = trim($send_url[1]);//token
+                
+                $receive_url = explode('com:3000/', $param['receive_url']);
+                $param['receive_url'] = 'http://sms.szfangmm.com:3000/api/smslist?token='.trim($receive_url[1]);
             }else{
                 //http://sms.newszfang.vip:3000/NHiSa4Rpm57qEeDojNENjk/send
                 //http://sms.newszfang.vip:3000/LnHPvdLfrUBpuPgXBL7EZg
