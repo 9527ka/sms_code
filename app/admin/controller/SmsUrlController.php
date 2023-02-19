@@ -170,6 +170,7 @@ class SmsUrlController extends AdminBaseController
             $phoneList = explode("\n", $com_phone);
             $haveArr = $haveChannelArr = [];
             for ($i = 0; $i < count($phoneList); $i++) {
+                
                 $add = [];
                 //拆分: com231,18855225522
                 //按空格
@@ -178,6 +179,9 @@ class SmsUrlController extends AdminBaseController
                 }else{
                     //按逗号
                     $info = explode(',',$phoneList[$i]);
+                }
+                if(!is_numeric($info[1])){
+                    return admin_error("号码格式错误");
                 }
                 //有重复导入的剔除，并加入提示数组
                 $sta = $smsMobile->where('mobile', trim($info[1]))->find();
@@ -237,28 +241,28 @@ class SmsUrlController extends AdminBaseController
             $result = $data->save($param);
             if(!empty($param['com_phone'])){
                 /*******************格式兼容 End**********************/
-                if(strpos($param['send_url'], 'smsncdn.szfangsk5.net') && strpos($param['receive_url'], 'sms.szfangmm.com')){
-                    $receive_url = explode('com:3000/', $param['receive_url']);
-                    $param['send_url'] = 'https://smsncdn.szfangsk5.net:48888/SendRoom.php?Room=7kAMiHgYZ1';
-                    $param['receive_url'] = 'https://smsncdn.szfangsk5.net:48888/listforjson.php?Room='.$receive_url[1];
-                }else{
-                    //sms.szfangmm.com
-                    if(strpos($param['send_url'], 'sms.szfangmm.com')){
-                        $send_url = str_replace("/send","",$param['send_url']);
-                        $send_url = explode(':3000/', $send_url);
-                        $param['send_url'] = 'http://sms.szfangmm.com:3000/api/send';
-                        $param['channel'] = $send_url[1];//token
+                // if(strpos($param['send_url'], 'smsncdn.szfangsk5.net') && strpos($param['receive_url'], 'sms.szfangmm.com')){
+                //     $receive_url = explode('com:3000/', $param['receive_url']);
+                //     $param['send_url'] = 'https://smsncdn.szfangsk5.net:48888/SendRoom.php?Room=7kAMiHgYZ1';
+                //     $param['receive_url'] = 'https://smsncdn.szfangsk5.net:48888/listforjson.php?Room='.$receive_url[1];
+                // }else{
+                //     //sms.szfangmm.com
+                //     if(strpos($param['send_url'], 'sms.szfangmm.com')){
+                //         $send_url = str_replace("/send","",$param['send_url']);
+                //         $send_url = explode(':3000/', $send_url);
+                //         $param['send_url'] = 'http://sms.szfangmm.com:3000/api/send';
+                //         $param['channel'] = $send_url[1];//token
                         
-                        $receive_url = explode(":3000/", $param['receive_url']);
-                        $param['receive_url'] = 'http://sms.szfangmm.com:3000/api/smslist?token='.$receive_url[1];
-                    }
+                //         $receive_url = explode(":3000/", $param['receive_url']);
+                //         $param['receive_url'] = 'http://sms.szfangmm.com:3000/api/smslist?token='.$receive_url[1];
+                //     }
                     
-                    //smsncdn.szfangsk5.net
-                    if(strpos($param['send_url'], 'smsncdn.szfangsk5.net')){
-                        $receive_url = explode('Room=', $param['receive_url']);
-                        $param['receive_url'] = 'https://smsncdn.szfangsk5.net:48888/listforjson.php?Room='.$receive_url[1];
-                    }
-                }
+                //     //smsncdn.szfangsk5.net
+                //     if(strpos($param['send_url'], 'smsncdn.szfangsk5.net')){
+                //         $receive_url = explode('Room=', $param['receive_url']);
+                //         $param['receive_url'] = 'https://smsncdn.szfangsk5.net:48888/listforjson.php?Room='.$receive_url[1];
+                //     }
+                // }
                 $com_phone = $param['com_phone'];
                 $mobileArr = $channelArr = [];//重复号码、重复号码所在渠道
                 //江苏无限码，纯手机号格式录入
@@ -266,6 +270,9 @@ class SmsUrlController extends AdminBaseController
                     $arr = $this->_savePhone($com_phone, $id);
                 }else{
                     $arr = $this->_saveComPhone($com_phone, $id);
+                }
+                if(!empty($arr['code'])){
+                    return admin_error($arr['msg']);
                 }
                 $mobileArr = $arr['mobileArr'];
                 $channelArr = $arr['channelArr'];
@@ -306,6 +313,10 @@ class SmsUrlController extends AdminBaseController
             $add = [];
             //有重复导入的剔除，并加入提示数组
             $mobile = trim($phoneList[$i]);
+            if(!is_numeric($mobile)){
+                return ['code' => 1001, 'msg' => $mobile.'号码格式错误'];
+                break;
+            }
             $sta = $smsMobile->where('mobile', $mobile)->find();
             if($sta){
                 array_push($channelArr, $sta['sms_url_id']);
@@ -353,7 +364,10 @@ class SmsUrlController extends AdminBaseController
                 $info = explode(',',$phoneList[$i]);
             }
             //有重复导入的剔除，并加入提示数组
-            $mobile = trim($info[0]);
+            $mobile = trim($info[1]);
+            if(!is_numeric($mobile)){
+                return ['code' => 1001, 'msg' => $mobile.'号码格式错误'];
+            }
             $sta = $smsMobile->where('mobile', $mobile)->find();
             if($sta){
                 array_push($channelArr, $sta['sms_url_id']);
