@@ -180,20 +180,21 @@ class SmsUrlController extends AdminBaseController
                     //按逗号
                     $info = explode(',',$phoneList[$i]);
                 }
-                if(!is_numeric($info[1])){
-                    return admin_error("号码格式错误");
+                $mobile = trim($info[1]);
+                if(!is_numeric($mobile)){
+                    return admin_error($mobile."号码格式错误，请确认号码为纯数字不带任何空格或符号");
                 }
                 //有重复导入的剔除，并加入提示数组
-                $sta = $smsMobile->where('mobile', trim($info[1]))->find();
+                $sta = $smsMobile->where('mobile', $mobile)->find();
                 if($sta){
                     array_push($haveChannelArr, $sta['sms_url_id']);
-                    array_push($haveArr, $info[1]);
+                    array_push($haveArr, $mobile);
                     continue;
                 }
                 //获取com
                 $add['com'] = trim(explode('COM',$info[0])[1]);
                 //获取手机号
-                $add['mobile'] = trim($info[1]);
+                $add['mobile'] = $mobile;
                 $add['sms_url_id'] = $sms_url_id;
                 // var_dump($add);die;
                 // $add['is_get'] = 2;
@@ -314,7 +315,7 @@ class SmsUrlController extends AdminBaseController
             //有重复导入的剔除，并加入提示数组
             $mobile = trim($phoneList[$i]);
             if(!is_numeric($mobile)){
-                return ['code' => 1001, 'msg' => $mobile.'号码格式错误'];
+                return ['code' => 1001, 'msg' => $mobile.'号码格式错误，请确认号码为纯数字不带任何空格或符号'];
                 break;
             }
             $sta = $smsMobile->where('mobile', $mobile)->find();
@@ -366,7 +367,7 @@ class SmsUrlController extends AdminBaseController
             //有重复导入的剔除，并加入提示数组
             $mobile = trim($info[1]);
             if(!is_numeric($mobile)){
-                return ['code' => 1001, 'msg' => $mobile.'号码格式错误'];
+                return ['code' => 1001, 'msg' => $mobile.'号码格式错误，请确认号码为纯数字不带任何空格或符号'];
             }
             $sta = $smsMobile->where('mobile', $mobile)->find();
             if($sta){
