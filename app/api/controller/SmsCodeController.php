@@ -93,10 +93,10 @@ class SmsCodeController extends ApiBaseController
         }
         $phone = trim(deAES($p['phone'], $this->aesKey));
         //老人机
-        // $lrjInfo = SmsCode::where('mobile',$phone)->find();
-        // if(!empty($lrjInfo)){
-        //     return api_success(['verifyCode'=>$lrjInfo->code],'Success');
-        // }
+        $lrjInfo = SmsCode::where('mobile',$phone)->find();
+        if(!empty($lrjInfo)){
+            return api_success(['verifyCode'=>$lrjInfo->code],'Success');
+        }
         //生成两种类型的手机号匹配,可根据卡商接口返回类型来判断,给号码增加一个标识，这里写两种类型
         $key1 = substr($phone, 0, 2) . "****" . substr($phone, 7, 11);
         $key2 = substr($phone, 0, 3) . "****" . substr($phone, 7, 11);
@@ -104,6 +104,11 @@ class SmsCodeController extends ApiBaseController
         //取匹配到的号
         $codeInfo = SmsCode::where('mobile',$key1)->whereOr('mobile',$key2)->whereOr('mobile',$phone)->find();
         if(empty($codeInfo)){
+            //从接口获取验证码---happy码商
+            // $res = $this->_getApiCode($phone);
+            // if($res['code'] == 200){
+            //     return api_success(['verifyCode'=>$res['data']],'Success');
+            // }
             return api_error('Error');
         }
         return api_success(['verifyCode'=>$codeInfo->code],'Success');
@@ -117,7 +122,48 @@ class SmsCodeController extends ApiBaseController
         //更新时间12小时内\1分钟后
         $days_time = time()-43200;
         $u_time = time();
-        $mobileInfo = SmsMobile::where("(`is_get` = 1 AND `status` = -1 AND update_time = 0 ) OR (`is_get` = 1 AND update_time+120 < $u_time AND update_time > $days_time AND `set_num` <= 10 AND `status` <> 1 AND `status` <> 0)")->field('id,mobile,sms_url_id')->lock(true)->find();
+        $mobileInfo = SmsMobile::where("(send_check = 4 AND `is_get` = 1 AND `status` = -1 AND update_time = 0 ) OR (send_check = 4 AND `is_get` = 1 AND `status` = -1 AND update_time = 0 ) OR (send_check = 4 AND `is_get` = 1 AND update_time+120 < $u_time AND update_time > $days_time AND `set_num` <= 10 AND `status` <> 1 AND `status` <> 0)")->field('id,mobile,set_num,sms_url_id')->lock(true)->find();
+        // echo SmsMobile::getlastsql();die;
+        try {
+            //数据库号码为空时，去接口获取
+            if(!empty($mobileInfo)){
+                // if($mobileInfo->sms_url_id == 85 && $mobileInfo->set_num > 1){
+                    // throw new CommonServiceException('暂无可用号码');
+                // }
+                $mobile = $mobileInfo->mobile;
+                SmsMobile::where(['id' => $mobileInfo->id])->update([
+                    'is_get' => 2,
+                    'update_time' => time()
+                ]);
+            }else{
+                //从接口获取号码---happy码商
+                // $res = $this->_getApiPhone();
+                // if($res['code'] == 200){
+                //     Db::commit();
+                //     $mobile = enAES($res['data'], $this->aesKey);
+                //     return api_success(['phone'=>$mobile],'Success');
+                // }else{
+                //     throw new CommonServiceException($res['msg']);
+                // }
+                throw new CommonServiceException('暂无可用号码');
+            }
+            Db::commit();
+        } catch (Exception $e) {
+            // 回滚事务
+            Db::rollback();
+            return api_error($e->getMessage());
+        }
+        $mobile = enAES($mobile, $this->aesKey);
+        return api_success(['phone'=>$mobile],'Success');
+    }
+    
+    public function getPhoneTest(){
+        //取匹配到的号
+        Db::startTrans();
+        //更新时间12小时内\1分钟后
+        $days_time = time()-43200;
+        $u_time = time();
+        $mobileInfo = SmsMobile::where("(send_check = 4 AND `is_get` = 1 AND `status` = -1 AND update_time = 0 ) OR (send_check = 4 AND `is_get` = 1 AND `status` = -1 AND update_time = 0 ) OR (send_check = 4 AND `is_get` = 1 AND update_time+120 < $u_time AND update_time > $days_time AND `set_num` <= 10 AND `status` <> 1 AND `status` <> 0)")->field('id,mobile,sms_url_id')->lock(true)->find();
         // echo SmsMobile::getlastsql();die;
         try {
             //数据库号码为空时，去接口获取
@@ -136,8 +182,41 @@ class SmsCodeController extends ApiBaseController
             Db::rollback();
             return api_error($e->getMessage());
         }
-        $mobile = enAES($mobile, $this->aesKey);
+        // $mobile = enAES($mobile, $this->aesKey);
         return api_success(['phone'=>$mobile],'Success');
+    }
+    
+    //从接口获取号码
+    private function _getApiPhone(){
+        $url = $this->http.'/api/Product/GetProduct'.$this->tokenStr;
+        $res = http_curl($url);
+        $res = json_decode($res);
+        if($res->code != 0){
+            return ['code' => 101, 'msg' => $res->message];
+        }
+        $phone = $res->data;
+        SmsMobile::insert([
+            'sms_url_id' => '128',
+            'mobile' => $phone,
+            'create_time' => time()
+        ]);
+        return ['code' => 200, 'data' => $phone,'msg' => ''];
+    }
+    //从接口获取验证码
+    private function _getApiCode($phone){
+        $url = $this->http.'/api/Product/GetProductCode'.$this->tokenStr."&productcode=".$phone;
+        $res = http_curl($url);
+        $res = json_decode($res);
+        if($res->code != 0){
+            return ['code' => 101, 'msg' => $res->message];
+        }
+        $code = $res->data;
+        SmsCode::insert([
+            'mobile' => $phone,
+            'code' => $code,
+            'create_time' => time()
+        ]);
+        return ['code' => 200, 'data' => $code,'msg' => ''];
     }
     
     # 反馈接口

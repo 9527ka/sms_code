@@ -1,7 +1,7 @@
 <?php
 /**
 * 后台设置:后台管理方面的设置
-* 此配置文件为自动生成，生成时间2023-01-03 15:53:15
+* 此配置文件为自动生成，生成时间2023-02-22 12:49:22
 */
 
 return [
@@ -25,7 +25,7 @@ return [
     // 登录token验证
     'token'=>'1',
     // 验证码
-    'captcha'=>'1',
+    'captcha'=>'0',
     // 登录背景
     'background'=>'/static/admin/images/login-default-bg.jpg',
     // 极验ID
@@ -56,6 +56,6 @@ return [
     // CSRFToken检测
     'check_token'=>'1',
     // CSRFToken验证方法
-    'check_token_action_list'=>'add,edit,del,profile,update',
+    'check_token_action_list'=>'add,edit,del,import,profile,update',
 ],
 ];

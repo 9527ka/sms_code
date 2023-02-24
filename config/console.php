@@ -8,10 +8,11 @@ use app\command\InitEnv;
 use app\command\ResetAdminPassword;
 use app\command\GetCodeSave;
 use app\command\GetCodeLrj;
-use app\command\GetMobileLrj;
-use app\command\GetMobileLrjTest;
+use app\command\GetMobileLrjSendCheck;
+use app\command\GetMobileLrjPullPhone;
 use app\command\WuxianCode;
 use app\command\DouYinFirst;
+use app\command\GetMobileCodeHappy;
 
 return [
     // 指令定义
@@ -33,10 +34,14 @@ return [
         //老人机 - 获取号码接口，存库
         'getMobileLrj'     => GetMobileLrj::class,
         //老人机 - 获取号码 一秒一个，测试
-        // 'getMobileLrjTest' => GetMobileLrjTest::class,
+        'getMobileLrjPullPhone' => GetMobileLrjPullPhone::class,
+        //老人机提交检测，是否开通抖音，12秒一次
+        'getMobileLrjSendCheck' => GetMobileLrjSendCheck::class,
         //扒网页的 抖音取码
         'wuxianCode' => WuxianCode::class,
         //抖音首次
         'douYinFirst' => DouYinFirst::class,
+        //happy码商，获取手机号+验证码
+        'getMobileCodeHappy' => GetMobileCodeHappy::class,
     ],
 ];
